@@ -8,6 +8,7 @@ public class LoginState : AState
 {
 
     [SerializeField] private Canvas LoginCanvas;
+    [SerializeField] private GameObject LoginScreen;
     [Space]
     [Header("Login UI")]
     [SerializeField] private Button LoginButton;
@@ -38,6 +39,7 @@ public class LoginState : AState
             manager.SwitchState("Loadout");
             yield break;
         }
+        LoginScreen.SetActive(true);
         RegisterButton.interactable = true;
         LoginButton.interactable = true;
         WhiteLabelLoginButton.interactable = true;
@@ -46,6 +48,7 @@ public class LoginState : AState
     public override void Exit(AState to)
     {
         LoginCanvas.gameObject.SetActive(false);
+        LoginScreen.SetActive(false);
         //TODO: Populate PlayerData Class
     }
 
@@ -121,12 +124,19 @@ public class LoginState : AState
         if (!loginResponse.success)
         {
             Debug.Log("Error while logging in");
+            FailedToLogin();
             yield break;
         }
 
         string token = loginResponse.SessionToken;
         yield return WhiteLabelSessionRoutine();
         if(!isRegister) manager.SwitchState("Loadout");
+    }
+
+    private void FailedToLogin()
+    {
+        //TODO: Create Pop-up about error
+        LoginButton.gameObject.SetActive(true);
     }
 
     private IEnumerator WhiteLabelSessionRoutine()
