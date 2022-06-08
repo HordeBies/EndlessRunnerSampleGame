@@ -6,12 +6,41 @@ using LootLocker.Requests;
 
 public class LoginState : AState
 {
-    [SerializeField] private Button LoginButton;
+
     [SerializeField] private Canvas LoginCanvas;
+    [Space]
+    [Header("Login UI")]
+    [SerializeField] private Button LoginButton;
+    [SerializeField] private Button WhiteLabelLoginButton;
+    [SerializeField] private InputField ExistingEmailField;
+    [SerializeField] private InputField ExistingPasswordField;
+    [Space]
+    [Header("Register UI")]
+    [SerializeField] private Button RegisterButton;
+    [SerializeField] private InputField RegisterUsernameField;
+    [SerializeField] private InputField RegisterEmailField;
+    [SerializeField] private InputField RegisterPasswordField;
+
+
+    private bool needLogin = true;
     public override void Enter(AState from)
     {
         LoginCanvas.gameObject.SetActive(true);
+        StartCoroutine(EnterStateRoutine());
+    }
+
+    private IEnumerator EnterStateRoutine()
+    {
+        yield return CheckSessionValidRoutine();
+        if (!needLogin)
+        {
+            yield return WhiteLabelSessionRoutine();
+            manager.SwitchState("Loadout");
+            yield break;
+        }
+        RegisterButton.interactable = true;
         LoginButton.interactable = true;
+        WhiteLabelLoginButton.interactable = true;
     }
 
     public override void Exit(AState to)
@@ -30,11 +59,24 @@ public class LoginState : AState
         
     }
 
-    public void Login()
+    public void LoginGuest()
     {
         LoginButton.interactable = false;
         StartCoroutine(GuestLoginRoutine());
     }
+
+    public void LoginWhiteLabel()
+    {
+        WhiteLabelLoginButton.interactable = false;
+        StartCoroutine(WhiteLabelLoginRoutine());
+    }
+
+    public void RegisterWhiteLabel()
+    {
+        RegisterButton.interactable = false;
+        StartCoroutine(CreateAccountRoutine());
+    }
+
 
     private IEnumerator GuestLoginRoutine()
     {
@@ -59,4 +101,102 @@ public class LoginState : AState
             Debug.LogError("Session Couldn't Started!");
         }
     }
+
+    private IEnumerator WhiteLabelLoginRoutine(bool isRegister = false)
+    {
+        string email = isRegister ? RegisterEmailField.text : ExistingEmailField.text;
+        string password = isRegister ? RegisterPasswordField.text : ExistingPasswordField.text;
+  
+       
+        bool rememberMe = false;
+        bool gotResponse = false;
+        LootLockerWhiteLabelLoginResponse loginResponse = null;
+        LootLockerSDKManager.WhiteLabelLogin(email, password, rememberMe, response =>
+        {
+            loginResponse = response;
+            gotResponse = true;
+        });
+
+        yield return new WaitWhile(() => gotResponse == false);
+        if (!loginResponse.success)
+        {
+            Debug.Log("Error while logging in");
+            yield break;
+        }
+
+        string token = loginResponse.SessionToken;
+        yield return WhiteLabelSessionRoutine();
+        if(!isRegister) manager.SwitchState("Loadout");
+    }
+
+    private IEnumerator WhiteLabelSessionRoutine()
+    {
+        bool gotResponse = false;
+        LootLockerSDKManager.StartWhiteLabelSession((response) =>
+        {
+            if (!response.success)
+            {
+                Debug.Log("Error while LootLocker Session");
+                return;
+            }
+            else
+            {
+                Debug.Log("Session Started!\nIdentifier: " + response.player_id);
+                PlayerData.instance.PlayerID = response.player_id.ToString();
+                
+            }
+            gotResponse = true;
+
+        });
+        yield return new WaitWhile(() => gotResponse == false);
+    }
+
+    private IEnumerator CreateAccountRoutine()
+    {
+        string email = RegisterEmailField.text;
+        string password = RegisterPasswordField.text;
+        LootLockerWhiteLabelSignupResponse signUpResponse = null;
+        LootLockerSDKManager.WhiteLabelSignUp(email, password, (response) =>
+        {
+            signUpResponse = response;
+        });
+
+        yield return new WaitWhile(() => signUpResponse == null);
+        if (!signUpResponse.success)
+        {
+            Debug.Log("error while creating user");
+            yield break;
+        }
+        Debug.Log("user created successfully");
+
+        yield return WhiteLabelLoginRoutine(true);
+
+        string userName = RegisterUsernameField.text;
+        Debug.Log("Starting to change name to: " + userName);
+        LootLockerHelper.ChangeUserName(userName);
+        manager.SwitchState("Loadout");
+    }
+
+    private IEnumerator CheckSessionValidRoutine()
+    {
+        bool gotResponse = false;
+        LootLockerSDKManager.CheckWhiteLabelSession(response =>
+        {
+            if (response)
+            {
+                Debug.Log("session is valid, you can start a game session");
+                needLogin = false;
+
+            }
+            else
+            {
+                Debug.Log("session is NOT valid, we should show the login form");
+                needLogin = true;
+            }
+            gotResponse = true;
+        });
+        yield return new WaitWhile(() => gotResponse == false);
+    }
+
+
 }

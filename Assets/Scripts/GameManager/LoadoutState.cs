@@ -416,16 +416,6 @@ public class LoadoutState : AState
 
     public void ChangeUserName()
     {
-        LootLockerSDKManager.SetPlayerName(playerNameInputField.text, (response) =>
-        {
-            if (response.success)
-            {
-                Debug.Log("Succesfully set player name");
-            }
-            else
-            {
-                Debug.LogError("Could not set player name " + response.Error);
-            }
-        });
+        LootLockerHelper.ChangeUserName(playerNameInputField.text);
     }
 }
