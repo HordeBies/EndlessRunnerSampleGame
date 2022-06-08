@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
 #endif
 using System.Collections.Generic;
- 
+using LootLocker.Requests;
 /// <summary>
 /// state pushed on top of the GameManager when the player dies.
 /// </summary>
@@ -21,14 +22,11 @@ public class GameOverState : AState
 
     public GameObject addButton;
 
+    bool ready;
     public override void Enter(AState from)
     {
         canvas.gameObject.SetActive(true);
-
-		miniLeaderboard.playerEntry.inputName.text = PlayerData.instance.previousName;
-		
-		miniLeaderboard.playerEntry.score.text = trackManager.score.ToString();
-		miniLeaderboard.Populate();
+        StartCoroutine(SetupGameOverState());
 
         if (PlayerData.instance.AnyMissionComplete())
             StartCoroutine(missionPopup.Open());
@@ -42,6 +40,11 @@ public class GameOverState : AState
             MusicPlayer.instance.SetStem(0, gameOverTheme);
 			StartCoroutine(MusicPlayer.instance.RestartAllStems());
         }
+    }
+    public IEnumerator SetupGameOverState()
+    {
+        yield return SubmitScoreRoutine();
+        yield return miniLeaderboard.Populate();
     }
 
 	public override void Exit(AState to)
@@ -57,15 +60,30 @@ public class GameOverState : AState
 
     public override void Tick()
     {
-        
-    }
 
-	public void OpenLeaderboard()
+    }
+    private int rank;
+    private IEnumerator SubmitScoreRoutine()
+    {
+        bool done = false;
+        LootLockerSDKManager.SubmitScore(
+            PlayerData.instance.PlayerID,
+            trackManager.score,
+            ThemeDatabase.GetThemeData(PlayerData.instance.themes[PlayerData.instance.usedTheme]).ThemeID,
+            (_response) =>
+            {
+                rank = _response.rank;
+                Debug.Log("Score Uploaded!");
+                done = true;
+            }
+        );
+
+        yield return new WaitWhile(() => done == false);
+    }
+    public void OpenLeaderboard()
 	{
 		fullLeaderboard.forcePlayerDisplay = false;
 		fullLeaderboard.displayPlayer = true;
-		fullLeaderboard.playerEntry.playerName.text = miniLeaderboard.playerEntry.inputName.text;
-		fullLeaderboard.playerEntry.score.text = trackManager.score.ToString();
 
 		fullLeaderboard.Open();
     }
@@ -130,16 +148,8 @@ public class GameOverState : AState
 
 	protected void FinishRun()
     {
-		if(miniLeaderboard.playerEntry.inputName.text == "")
-		{
-			miniLeaderboard.playerEntry.inputName.text = "Trash Cat";
-		}
-		else
-		{
-			PlayerData.instance.previousName = miniLeaderboard.playerEntry.inputName.text;
-		}
 
-        PlayerData.instance.InsertScore(trackManager.score, miniLeaderboard.playerEntry.inputName.text );
+        PlayerData.instance.InsertScore(trackManager.score, "Trash Cat" );
 
         CharacterCollider.DeathEvent de = trackManager.characterController.characterCollider.deathData;
         //register data to analytics
@@ -161,4 +171,5 @@ public class GameOverState : AState
     }
 
     //----------------
+
 }

@@ -17,6 +17,7 @@ public class ThemeData : ScriptableObject
 {
     [Header("Theme Data")]
     public string themeName;
+    public int ThemeID;
     public int cost;
 	public int premiumCost;
 	public Sprite themeIcon;

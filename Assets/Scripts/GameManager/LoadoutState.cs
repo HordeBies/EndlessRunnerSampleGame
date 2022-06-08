@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using LootLocker.Requests;
 
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
@@ -50,7 +51,8 @@ public class LoadoutState : AState
     public MeshFilter UIGroundFilter;
 
 	public AudioClip menuTheme;
-
+    [Header("Settings UI")]
+    public InputField playerNameInputField;
 
     [Header("Prefabs")]
     public ConsumableIcon consumableIcon;
@@ -410,5 +412,20 @@ public class LoadoutState : AState
 		leaderboard.displayPlayer = false;
 		leaderboard.forcePlayerDisplay = false;
 		leaderboard.Open();
+    }
+
+    public void ChangeUserName()
+    {
+        LootLockerSDKManager.SetPlayerName(playerNameInputField.text, (response) =>
+        {
+            if (response.success)
+            {
+                Debug.Log("Succesfully set player name");
+            }
+            else
+            {
+                Debug.LogError("Could not set player name " + response.Error);
+            }
+        });
     }
 }

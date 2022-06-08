@@ -31,6 +31,7 @@ public class PlayerData
 
     protected string saveFile = "";
 
+    public string PlayerID;
 
     public int coins;
     public int premium;
