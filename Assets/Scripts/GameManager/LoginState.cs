@@ -9,7 +9,7 @@ public class LoginState : AState
 {
 
     [SerializeField] private Canvas LoginCanvas;
-    [SerializeField] private GameObject LoginScreen;
+    [SerializeField] private GameObject LoginTypeSelectionMenu;
     [Space]
     [Header("Login UI")]
     [SerializeField] private Button LoginButton;
@@ -41,7 +41,7 @@ public class LoginState : AState
             manager.SwitchState("Loadout");
             yield break;
         }
-        LoginScreen.SetActive(true);
+        LoginTypeSelectionMenu.SetActive(true);
         RegisterButton.interactable = true;
         LoginButton.interactable = true;
         WhiteLabelLoginButton.interactable = true;
@@ -50,7 +50,7 @@ public class LoginState : AState
     public override void Exit(AState to)
     {
         LoginCanvas.gameObject.SetActive(false);
-        LoginScreen.SetActive(false);
+        LoginTypeSelectionMenu.SetActive(false);
         //TODO: Populate PlayerData Class
     }
 

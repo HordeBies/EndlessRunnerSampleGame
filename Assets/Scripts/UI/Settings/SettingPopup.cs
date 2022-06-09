@@ -50,6 +50,12 @@ public class SettingPopup : MonoBehaviour
         confirmationPopup.Open(loadoutState);
     }
 
+    public void LogOut()
+    {
+        confirmationPopup.Open(loadoutState);
+
+    }
+
 
     public void MasterVolumeChangeValue(float value)
     {
