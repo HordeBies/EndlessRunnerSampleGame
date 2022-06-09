@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using LootLocker.Requests;
+using TMPro;
 
 public class LoginState : AState
 {
@@ -13,8 +14,9 @@ public class LoginState : AState
     [Header("Login UI")]
     [SerializeField] private Button LoginButton;
     [SerializeField] private Button WhiteLabelLoginButton;
-    [SerializeField] private InputField ExistingEmailField;
-    [SerializeField] private InputField ExistingPasswordField;
+    [SerializeField] private TMP_InputField ExistingEmailField;
+    [SerializeField] private TMP_InputField ExistingPasswordField;
+    [SerializeField] private Toggle RememberMe;
     [Space]
     [Header("Register UI")]
     [SerializeField] private Button RegisterButton;
@@ -33,7 +35,7 @@ public class LoginState : AState
     private IEnumerator EnterStateRoutine()
     {
         yield return CheckSessionValidRoutine();
-        if (!needLogin)
+        if (false && !needLogin) //TODO: enable this part!
         {
             yield return WhiteLabelSessionRoutine();
             manager.SwitchState("Loadout");
@@ -111,10 +113,9 @@ public class LoginState : AState
         string password = isRegister ? RegisterPasswordField.text : ExistingPasswordField.text;
   
        
-        bool rememberMe = false;
         bool gotResponse = false;
         LootLockerWhiteLabelLoginResponse loginResponse = null;
-        LootLockerSDKManager.WhiteLabelLogin(email, password, rememberMe, response =>
+        LootLockerSDKManager.WhiteLabelLogin(email, password, RememberMe.isOn, response =>
         {
             loginResponse = response;
             gotResponse = true;
@@ -136,7 +137,8 @@ public class LoginState : AState
     private void FailedToLogin()
     {
         //TODO: Create Pop-up about error
-        LoginButton.gameObject.SetActive(true);
+        LoginButton.interactable = true;
+        WhiteLabelLoginButton.interactable = true;
     }
 
     private IEnumerator WhiteLabelSessionRoutine()
