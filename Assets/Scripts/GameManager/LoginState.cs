@@ -4,12 +4,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using LootLocker.Requests;
 using TMPro;
+using Newtonsoft.Json;
 
 public class LoginState : AState
 {
 
     [SerializeField] private Canvas LoginCanvas;
     [SerializeField] private GameObject LoginTypeSelectionMenu;
+    [Space]
+    [Header("General Fields")]
+    [SerializeField] private GameObject ErrorPopup;
+    [SerializeField] private TMP_Text ErrorMessage;
     [Space]
     [Header("Login UI")]
     [SerializeField] private Button LoginButton;
@@ -118,6 +123,8 @@ public class LoginState : AState
         else
         {
             Debug.LogError("Session Couldn't Started!");
+            var responseDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.text);
+            StartCoroutine(FailedToLogin(responseDict["message"]));
         }
     }
 
@@ -139,7 +146,8 @@ public class LoginState : AState
         if (!loginResponse.success)
         {
             Debug.Log("Error while logging in");
-            FailedToLogin();
+            var responseDict = JsonConvert.DeserializeObject<Dictionary<string,string>>(loginResponse.text);
+            StartCoroutine(FailedToLogin(responseDict["message"]));
             yield break;
         }
 
@@ -148,11 +156,17 @@ public class LoginState : AState
         if(!isRegister) manager.SwitchState("Loadout");
     }
 
-    private void FailedToLogin()
+    private IEnumerator FailedToLogin(string error,float duration = 2f)
     {
         //TODO: Create Pop-up about error
+        ErrorMessage.text = error;
+        ErrorPopup.SetActive(true);
+        
+        yield return new WaitForSeconds(duration);
+        
         LoginButton.interactable = true;
         WhiteLabelLoginButton.interactable = true;
+        ErrorPopup.SetActive(false);
     }
 
     private IEnumerator WhiteLabelSessionRoutine()
