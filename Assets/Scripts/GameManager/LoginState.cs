@@ -23,6 +23,13 @@ public class LoginState : AState
     [SerializeField] private InputField RegisterUsernameField;
     [SerializeField] private InputField RegisterEmailField;
     [SerializeField] private InputField RegisterPasswordField;
+    [Header("Logout")]
+    [SerializeField] private Button LogoutButton;
+    [SerializeField] private Button LogoutYesButton;
+    [SerializeField] private Button LogoutNoButton;
+    [SerializeField] private SettingPopup SettingPopUp;
+
+
 
 
     private bool needLogin = true;
@@ -45,6 +52,7 @@ public class LoginState : AState
         RegisterButton.interactable = true;
         LoginButton.interactable = true;
         WhiteLabelLoginButton.interactable = true;
+        LogoutButton.interactable = true;
     }
 
     public override void Exit(AState to)
@@ -82,6 +90,12 @@ public class LoginState : AState
         StartCoroutine(CreateAccountRoutine());
     }
 
+    public void LogOut()
+    {
+        LogoutButton.interactable = false;
+        LoginCanvas.gameObject.SetActive(true);
+        StartCoroutine(LogOutRoutine());        
+    }
 
     private IEnumerator GuestLoginRoutine()
     {
@@ -210,5 +224,27 @@ public class LoginState : AState
         yield return new WaitWhile(() => gotResponse == false);
     }
 
+    private IEnumerator LogOutRoutine()
+    {
 
+        LootLockerSessionResponse endSessionResponse = null;
+        LootLockerSessionRequest sessionRequest = new LootLockerSessionRequest();
+        LootLocker.LootLockerAPIManager.EndSession(sessionRequest, (response) =>
+        {
+            endSessionResponse = response;
+        });
+        
+        yield return new WaitWhile(() => endSessionResponse == null);
+        if (!endSessionResponse.success)
+        {
+            Debug.Log("Error while ending session");
+            LoginCanvas.gameObject.SetActive(false);
+            yield break;
+        }
+        Debug.Log("Session ended successfully");
+        LogoutButton.interactable = true;
+        manager.SwitchState("Login");
+        SettingPopUp.gameObject.SetActive(false);
+        SettingPopUp.transform.GetChild(1).gameObject.SetActive(false);
+    }
 }

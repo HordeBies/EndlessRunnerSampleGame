@@ -10235,10 +10235,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1918594631}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: Deny
-        m_Mode: 1
+      - m_Target: {fileID: 1918594629}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -14247,9 +14247,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1918594631}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: Confirm
+      - m_Target: {fileID: 1709046011}
+        m_TargetAssemblyTypeName: LoginState, Assembly-CSharp
+        m_MethodName: LogOut
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -14257,7 +14257,7 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 0
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!114 &1071772562
 MonoBehaviour:
@@ -24383,6 +24383,10 @@ MonoBehaviour:
   RegisterUsernameField: {fileID: 1945208590}
   RegisterEmailField: {fileID: 848182757}
   RegisterPasswordField: {fileID: 862821422}
+  LogoutButton: {fileID: 26968427}
+  LogoutYesButton: {fileID: 1071772561}
+  LogoutNoButton: {fileID: 846984645}
+  SettingPopUp: {fileID: 1971115931}
 --- !u!223 &1709046012
 Canvas:
   m_ObjectHideFlags: 0
