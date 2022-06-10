@@ -12,10 +12,6 @@ public class LoginState : AState
     [SerializeField] private Canvas LoginCanvas;
     [SerializeField] private GameObject LoginTypeSelectionMenu;
     [Space]
-    [Header("General Fields")]
-    [SerializeField] private GameObject ErrorPopup;
-    [SerializeField] private TMP_Text ErrorMessage;
-    [Space]
     [Header("Login UI")]
     [SerializeField] private Button LoginButton;
     [SerializeField] private Button WhiteLabelLoginButton;
@@ -156,17 +152,24 @@ public class LoginState : AState
         if(!isRegister) manager.SwitchState("Loadout");
     }
 
-    private IEnumerator FailedToLogin(string error,float duration = 2f)
+    private IEnumerator FailedToLogin(string error,float duration = 5f)
     {
         //TODO: Create Pop-up about error
-        ErrorMessage.text = error;
-        ErrorPopup.SetActive(true);
+        PopupManager.CreatePopup(PopupType.Error, error, duration);
         
-        yield return new WaitForSeconds(duration);
+        yield return new WaitForSeconds(2f);
         
         LoginButton.interactable = true;
         WhiteLabelLoginButton.interactable = true;
-        ErrorPopup.SetActive(false);
+    }
+
+    private IEnumerator FailedToRegister(string error, float duration = 5f)
+    {
+        //TODO: create popup about registering error
+
+        yield return new WaitForSeconds(2f);
+        //TODO: reenable register button
+
     }
 
     private IEnumerator WhiteLabelSessionRoutine()
@@ -205,6 +208,8 @@ public class LoginState : AState
         if (!signUpResponse.success)
         {
             Debug.Log("error while creating user");
+            var responseDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(signUpResponse.text);
+            var error = responseDict["message"];
             yield break;
         }
         Debug.Log("user created successfully");
@@ -213,7 +218,7 @@ public class LoginState : AState
 
         string userName = RegisterUsernameField.text;
         Debug.Log("Starting to change name to: " + userName);
-        LootLockerHelper.ChangeUserName(userName);
+        LootLockerHelper.ChangeUserName(userName,null);
         manager.SwitchState("Loadout");
     }
 
