@@ -104,17 +104,9 @@ public class LoginState : AState
             case "Life":
                 if(int.Parse(value) > 0) PlayerData.instance.consumables[Consumable.ConsumableType.EXTRALIFE] = int.Parse(value);
                 break;
-            case "TrashCat":
-                if (bool.Parse(value)) PlayerData.instance.characters.Add("Trash Cat");
-                else PlayerData.instance.characters.Remove("Trash Cat");
-                break;
             case "RubbishRaccoon":
                 if (bool.Parse(value)) PlayerData.instance.characters.Add("Rubbish Raccoon");
                 else PlayerData.instance.characters.Remove("Rubbish Raccoon");
-                break;
-            case "DayTheme":
-                if (bool.Parse(value)) PlayerData.instance.themes.Add("Day");
-                else PlayerData.instance.characters.Remove("Day");
                 break;
             case "NightTheme":
                 if (bool.Parse(value)) PlayerData.instance.themes.Add("NightTime");
@@ -309,14 +301,12 @@ public class LoginState : AState
         var life = StartCoroutine(RegisterKVP("Life", "0"));
 
         //Characters
-        var trashCat = StartCoroutine(RegisterKVP("TrashCat", "true"));
         var rubbishRaccoon = StartCoroutine(RegisterKVP("RubbishRaccoon", "false"));
 
         //Accessories
         //TODO: Add Accessories
 
         //Themes
-        var dayTheme = StartCoroutine(RegisterKVP("DayTheme", "true"));
         var nightTheme = StartCoroutine(RegisterKVP("NightTheme", "false"));
 
         yield return coin;
@@ -325,9 +315,7 @@ public class LoginState : AState
         yield return x2;
         yield return invincible;
         yield return life;
-        yield return trashCat;
         yield return rubbishRaccoon;
-        yield return dayTheme;
         yield return nightTheme;
 
     }

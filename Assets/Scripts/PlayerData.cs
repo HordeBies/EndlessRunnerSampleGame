@@ -238,6 +238,9 @@ public class PlayerData
 		m_Instance.characterAccessories.Clear();
 		m_Instance.consumables.Clear();
 
+        m_Instance.themes.Add("Day");
+        m_Instance.characters.Add("Trash Cat");
+
 		m_Instance.usedCharacter = 0;
 		m_Instance.usedTheme = 0;
 		m_Instance.usedAccessory = -1;
