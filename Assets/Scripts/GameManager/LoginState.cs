@@ -21,9 +21,9 @@ public class LoginState : AState
     [Space]
     [Header("Register UI")]
     [SerializeField] private Button RegisterButton;
-    [SerializeField] private InputField RegisterUsernameField;
-    [SerializeField] private InputField RegisterEmailField;
-    [SerializeField] private InputField RegisterPasswordField;
+    [SerializeField] private TMP_InputField RegisterUsernameField;
+    [SerializeField] private TMP_InputField RegisterEmailField;
+    [SerializeField] private TMP_InputField RegisterPasswordField;
     [Header("Logout")]
     [SerializeField] private Button LogoutButton;
     [SerializeField] private Button LogoutYesButton;
