@@ -20,6 +20,7 @@ public class LoginState : AState
     [SerializeField] private Toggle RememberMe;
     [Space]
     [Header("Register UI")]
+    [SerializeField] private GameObject RegisterCanvas;
     [SerializeField] private Button RegisterButton;
     [SerializeField] private InputField RegisterUsernameField;
     [SerializeField] private InputField RegisterEmailField;
@@ -166,10 +167,11 @@ public class LoginState : AState
 
     private IEnumerator FailedToRegister(string error, float duration = 5f)
     {
-        //TODO: create popup about registering error
+        PopupManager.CreatePopup(PopupType.Error, error, duration);
 
         yield return new WaitForSeconds(2f);
-        //TODO: reenable register button
+
+        RegisterButton.interactable = true;
 
     }
 
@@ -211,11 +213,13 @@ public class LoginState : AState
             Debug.Log("error while creating user");
             var responseDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(signUpResponse.text);
             var error = responseDict["message"];
-            PopupManager.CreatePopup(PopupType.Error, error);
+            StartCoroutine(FailedToRegister(error));
             yield break;
         }
         PopupManager.CreatePopup(PopupType.Info, "User Created Successfully");
         Debug.Log("user created successfully");
+
+        RegisterCanvas.SetActive(false);
 
         yield return WhiteLabelLoginRoutine(true);
 
