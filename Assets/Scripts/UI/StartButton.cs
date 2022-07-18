@@ -16,7 +16,7 @@ public class StartButton : MonoBehaviour
         if (PlayerData.instance.ftueLevel == 0)
         {
             PlayerData.instance.ftueLevel = 1;
-            PlayerData.instance.Save();
+            //PlayerData.instance.Save();
 #if UNITY_ANALYTICS
             AnalyticsEvent.FirstInteraction("start_button_pressed");
 #endif

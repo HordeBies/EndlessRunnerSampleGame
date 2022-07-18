@@ -85,7 +85,7 @@ public class GameState : AState
     protected TrackSegment m_NextValidSegment = null;
     protected int k_ObstacleToClear = 3;
 
-    public override void Enter(AState from)
+    public override IEnumerator Enter(AState from)
     {
         m_CountdownRectTransform = countdownText.GetComponent<RectTransform>();
 
@@ -105,6 +105,8 @@ public class GameState : AState
         m_GameoverSelectionDone = false;
 
         StartGame();
+
+        yield return null;
     }
 
     public override void Exit(AState to)
@@ -112,6 +114,11 @@ public class GameState : AState
         canvas.gameObject.SetActive(false);
 
         ClearPowerup();
+    }
+
+    public override IEnumerator Exit()
+    {
+        yield return null;
     }
 
     public void StartGame()
@@ -326,8 +333,9 @@ public class GameState : AState
 		AudioListener.pause = false;
 		trackManager.End();
 		trackManager.isRerun = false;
-        PlayerData.instance.Save();
-		manager.SwitchState ("Loadout");
+        //TODO: Check This
+        //PlayerData.instance.Save();
+        StartCoroutine(manager.SwitchState ("Loadout"));
 	}
 
     protected void UpdateUI()
@@ -386,7 +394,7 @@ public class GameState : AState
         if (currentModifier.OnRunEnd(this))
         {
             if (trackManager.isRerun)
-                manager.SwitchState("GameOver");
+                StartCoroutine(manager.SwitchState("GameOver"));
             else
                 OpenGameOverPopup();
         }
@@ -418,7 +426,7 @@ public class GameState : AState
 
     public void GameOver()
     {
-        manager.SwitchState("GameOver");
+        StartCoroutine(manager.SwitchState("GameOver"));
     }
 
     public void PremiumForLife()
@@ -595,7 +603,7 @@ public class GameState : AState
     public void FinishTutorial()
     {
         PlayerData.instance.tutorialDone = true;
-        PlayerData.instance.Save();
+        //PlayerData.instance.Save();
 
         QuitToLoadout();
     }

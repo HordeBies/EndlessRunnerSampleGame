@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
 #endif
@@ -69,17 +70,18 @@ public class GameManager : MonoBehaviour
     }
 
     // State management
-    public void SwitchState(string newState)
+    public IEnumerator SwitchState(string newState)
     {
         AState state = FindState(newState);
         if (state == null)
         {
             Debug.LogError("Can't find the state named " + newState);
-            return;
+            yield break;
         }
 
+        yield return m_StateStack[m_StateStack.Count - 1].Exit();
+        yield return state.Enter(m_StateStack[m_StateStack.Count - 1]);
         m_StateStack[m_StateStack.Count - 1].Exit(state);
-        state.Enter(m_StateStack[m_StateStack.Count - 1]);
         m_StateStack.RemoveAt(m_StateStack.Count - 1);
         m_StateStack.Add(state);
     }
@@ -120,11 +122,11 @@ public class GameManager : MonoBehaviour
         if (m_StateStack.Count > 0)
         {
             m_StateStack[m_StateStack.Count - 1].Exit(state);
-            state.Enter(m_StateStack[m_StateStack.Count - 1]);
+            StartCoroutine(state.Enter(m_StateStack[m_StateStack.Count - 1]));
         }
         else
         {
-            state.Enter(null);
+            StartCoroutine(state.Enter(null));
         }
         m_StateStack.Add(state);
     }
@@ -135,7 +137,8 @@ public abstract class AState : MonoBehaviour
     [HideInInspector]
     public GameManager manager;
 
-    public abstract void Enter(AState from);
+    public abstract IEnumerator Enter(AState from);
+    public abstract IEnumerator Exit();
     public abstract void Exit(AState to);
     public abstract void Tick();
     public abstract string GetName();

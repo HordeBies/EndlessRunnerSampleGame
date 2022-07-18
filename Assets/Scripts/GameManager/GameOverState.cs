@@ -23,7 +23,7 @@ public class GameOverState : AState
     public GameObject addButton;
 
     bool ready;
-    public override void Enter(AState from)
+    public override IEnumerator Enter(AState from)
     {
         canvas.gameObject.SetActive(true);
         StartCoroutine(SetupGameOverState());
@@ -40,6 +40,8 @@ public class GameOverState : AState
             MusicPlayer.instance.SetStem(0, gameOverTheme);
 			StartCoroutine(MusicPlayer.instance.RestartAllStems());
         }
+
+        yield return null;
     }
     public IEnumerator SetupGameOverState()
     {
@@ -51,6 +53,10 @@ public class GameOverState : AState
     {
         canvas.gameObject.SetActive(false);
         FinishRun();
+    }
+    public override IEnumerator Exit()
+    {
+        yield return null;
     }
 
     public override string GetName()
@@ -97,18 +103,18 @@ public class GameOverState : AState
     public void GoToLoadout()
     {
         trackManager.isRerun = false;
-		manager.SwitchState("Loadout");
+        StartCoroutine(manager.SwitchState("Loadout"));
     }
 
     public void RunAgain()
     {
         trackManager.isRerun = false;
-        manager.SwitchState("Game");
+        StartCoroutine(manager.SwitchState("Game"));
     }
 
     protected void CreditCoins()
 	{
-		PlayerData.instance.Save();
+		PlayerData.instance.Save(PlayerData.SaveType.Currency);
 
 #if UNITY_ANALYTICS // Using Analytics Standard Events v0.3.0
         var transactionId = System.Guid.NewGuid().ToString();
@@ -164,8 +170,8 @@ public class GameOverState : AState
             { "character", de.character },
         });
 #endif
-
-        PlayerData.instance.Save();
+        //TODO: CHECK THIS
+        //PlayerData.instance.Save();
 
         trackManager.End();
     }

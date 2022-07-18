@@ -29,7 +29,7 @@ public class SettingPopup : MonoBehaviour
 
     public void Close()
     {
-		PlayerData.instance.Save ();
+		//PlayerData.instance.Save ();
         gameObject.SetActive(false);
     }
 

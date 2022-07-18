@@ -94,7 +94,7 @@ public class ShopItemList : ShopList
         PlayerData.instance.coins -= c.GetPrice();
 		PlayerData.instance.premium -= c.GetPremiumCost();
 		PlayerData.instance.Add(c.GetConsumableType());
-        PlayerData.instance.Save();
+        //PlayerData.instance.Save();
 
 #if UNITY_ANALYTICS // Using Analytics Standard Events v0.3.0
         var transactionId = System.Guid.NewGuid().ToString();

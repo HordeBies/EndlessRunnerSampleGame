@@ -458,7 +458,7 @@ public class TrackManager : MonoBehaviour
             if (m_TotalWorldDistance > currentTarget)
             {
                 PlayerData.instance.rank += 1;
-                PlayerData.instance.Save();
+                //PlayerData.instance.Save();
 #if UNITY_ANALYTICS
 //"level" in our game are milestone the player have to reach : one every 300m
             AnalyticsEvent.LevelUp(PlayerData.instance.rank);

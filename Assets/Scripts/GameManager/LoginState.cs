@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using LootLocker.Requests;
 using TMPro;
 using Newtonsoft.Json;
+using System.Linq;
 
 public class LoginState : AState
 {
@@ -13,6 +14,7 @@ public class LoginState : AState
     [SerializeField] private GameObject LoginTypeSelectionMenu;
     [Space]
     [Header("Login UI")]
+    [SerializeField] private GameObject WhiteLoginCanvas;
     [SerializeField] private Button LoginButton;
     [SerializeField] private Button WhiteLabelLoginButton;
     [SerializeField] private TMP_InputField ExistingEmailField;
@@ -35,19 +37,19 @@ public class LoginState : AState
 
 
     private bool needLogin = true;
-    public override void Enter(AState from)
+    public override IEnumerator Enter(AState from)
     {
         LoginCanvas.gameObject.SetActive(true);
-        StartCoroutine(EnterStateRoutine());
+        yield return EnterStateRoutine();
     }
 
     private IEnumerator EnterStateRoutine()
     {
-        yield return CheckSessionValidRoutine();
+        //yield return CheckSessionValidRoutine();
         if (false && !needLogin) //TODO: enable this part!
         {
             yield return WhiteLabelSessionRoutine();
-            manager.SwitchState("Loadout");
+            StartCoroutine(manager.SwitchState("Loadout"));
             yield break;
         }
         LoginTypeSelectionMenu.SetActive(true);
@@ -57,12 +59,70 @@ public class LoginState : AState
         LogoutButton.interactable = true;
     }
 
+    public override IEnumerator Exit()
+    {
+        bool done = false;
+        PlayerData.NewSave();
+        LootLockerSDKManager.GetEntirePersistentStorage(response => {
+            Debug.Log(response);
+            foreach (var kvp in response.payload)
+            {
+                ReadKVP(kvp.key, kvp.value);
+            }
+            done = true;
+        });
+
+        yield return new WaitUntil(() => done);
+        PlayerData.instance.tutorialDone = true;
+        Debug.Log("Done");
+    }
     public override void Exit(AState to)
     {
         LoginCanvas.gameObject.SetActive(false);
         LoginTypeSelectionMenu.SetActive(false);
-        //TODO: Populate PlayerData Class
-        var pd = PlayerData.instance;
+    }
+
+    private void ReadKVP(string key, string value)
+    {
+        switch (key)
+        {
+            case "Coin":
+                PlayerData.instance.coins = int.Parse(value);
+                break;
+            case "Premium":
+                PlayerData.instance.premium = int.Parse(value);
+                break;
+            case "Magnet":
+                if (int.Parse(value) > 0) PlayerData.instance.consumables[Consumable.ConsumableType.COIN_MAG] = int.Parse(value);
+                break;
+            case "X2":
+                if (int.Parse(value) > 0) PlayerData.instance.consumables[Consumable.ConsumableType.SCORE_MULTIPLAYER] = int.Parse(value);
+                break;
+            case "Invincible":
+                if (int.Parse(value) > 0) PlayerData.instance.consumables[Consumable.ConsumableType.INVINCIBILITY] = int.Parse(value);
+                break;
+            case "Life":
+                if(int.Parse(value) > 0) PlayerData.instance.consumables[Consumable.ConsumableType.EXTRALIFE] = int.Parse(value);
+                break;
+            case "TrashCat":
+                if (bool.Parse(value)) PlayerData.instance.characters.Add("Trash Cat");
+                else PlayerData.instance.characters.Remove("Trash Cat");
+                break;
+            case "RubbishRaccoon":
+                if (bool.Parse(value)) PlayerData.instance.characters.Add("Rubbish Raccoon");
+                else PlayerData.instance.characters.Remove("Rubbish Raccoon");
+                break;
+            case "DayTheme":
+                if (bool.Parse(value)) PlayerData.instance.themes.Add("Day");
+                else PlayerData.instance.characters.Remove("Day");
+                break;
+            case "NightTheme":
+                if (bool.Parse(value)) PlayerData.instance.themes.Add("NightTime");
+                else PlayerData.instance.characters.Remove("NightTime");
+                break;
+            default:
+                break;
+        }
     }
 
     public override string GetName()
@@ -114,9 +174,10 @@ public class LoginState : AState
 
         if (response.success)
         {
+            if (!response.seen_before) yield return PopulateCloudData();
             Debug.Log("Session Started!\nIdentifier: "+ response.player_identifier);
             PlayerData.instance.PlayerID = response.player_id.ToString();
-            manager.SwitchState("Loadout");
+            StartCoroutine(manager.SwitchState("Loadout"));
         }
         else
         {
@@ -151,8 +212,12 @@ public class LoginState : AState
 
         string token = loginResponse.SessionToken;
         yield return WhiteLabelSessionRoutine();
-        if(!isRegister) manager.SwitchState("Loadout");
-    }
+        if (!isRegister)
+        {
+            WhiteLoginCanvas.SetActive(false);
+            StartCoroutine(manager.SwitchState("Loadout"));
+        }
+        }
 
     private IEnumerator FailedToLogin(string error,float duration = 5f)
     {
@@ -223,10 +288,58 @@ public class LoginState : AState
 
         yield return WhiteLabelLoginRoutine(true);
 
+        yield return PopulateCloudData();
+
         string userName = RegisterUsernameField.text;
         Debug.Log("Starting to change name to: " + userName);
         LootLockerHelper.ChangeUserName(userName,null);
-        manager.SwitchState("Loadout");
+        StartCoroutine(manager.SwitchState("Loadout"));
+    }
+
+    private IEnumerator PopulateCloudData()
+    {
+        //Currencies
+        var coin = StartCoroutine(RegisterKVP("Coin", "0"));
+        var premium = StartCoroutine(RegisterKVP("Premium", "0"));
+
+        //Collectables
+        var magnet = StartCoroutine(RegisterKVP("Magnet", "0"));
+        var x2 = StartCoroutine(RegisterKVP("X2", "0"));
+        var invincible = StartCoroutine(RegisterKVP("Invincible", "0"));
+        var life = StartCoroutine(RegisterKVP("Life", "0"));
+
+        //Characters
+        var trashCat = StartCoroutine(RegisterKVP("TrashCat", "true"));
+        var rubbishRaccoon = StartCoroutine(RegisterKVP("RubbishRaccoon", "false"));
+
+        //Accessories
+        //TODO: Add Accessories
+
+        //Themes
+        var dayTheme = StartCoroutine(RegisterKVP("DayTheme", "true"));
+        var nightTheme = StartCoroutine(RegisterKVP("NightTheme", "false"));
+
+        yield return coin;
+        yield return premium;
+        yield return magnet;
+        yield return x2;
+        yield return invincible;
+        yield return life;
+        yield return trashCat;
+        yield return rubbishRaccoon;
+        yield return dayTheme;
+        yield return nightTheme;
+
+    }
+
+    private IEnumerator RegisterKVP(string key, string value)
+    {
+        bool done = false;
+        LootLockerSDKManager.UpdateOrCreateKeyValue(key, value, response =>
+        {
+            done = true;
+        });
+        yield return new WaitUntil(() => done);
     }
 
     private IEnumerator CheckSessionValidRoutine()
@@ -269,7 +382,7 @@ public class LoginState : AState
         }
         Debug.Log("Session ended successfully");
         LogoutButton.interactable = true;
-        manager.SwitchState("Login");
+        StartCoroutine(manager.SwitchState("Login"));
         SettingPopUp.gameObject.SetActive(false);
         SettingPopUp.transform.GetChild(1).gameObject.SetActive(false);
     }

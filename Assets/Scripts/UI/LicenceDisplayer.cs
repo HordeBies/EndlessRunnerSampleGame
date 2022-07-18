@@ -16,7 +16,7 @@ public class LicenceDisplayer : MonoBehaviour
 	public void Accepted()
     {
         PlayerData.instance.licenceAccepted = true;
-        PlayerData.instance.Save();
+        //PlayerData.instance.Save();
         Close();
     }
 

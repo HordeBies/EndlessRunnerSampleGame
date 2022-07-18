@@ -73,7 +73,7 @@ public class LoadoutState : AState
     protected int k_UILayer;
     protected readonly Quaternion k_FlippedYAxisRotation = Quaternion.Euler (0f, 180f, 0f);
 
-    public override void Enter(AState from)
+    public override IEnumerator Enter(AState from)
     {
         tutorialBlocker.SetActive(!PlayerData.instance.tutorialDone);
         tutorialPrompt.SetActive(false);
@@ -109,6 +109,7 @@ public class LoadoutState : AState
         }
 
         Refresh();
+        yield return null;
     }
 
     public override void Exit(AState to)
@@ -138,6 +139,12 @@ public class LoadoutState : AState
                 gs.trackManager.characterController.inventory = inv;
             }
         }
+
+    }
+
+    public override IEnumerator Exit()
+    {
+        yield return null;
     }
 
     public void Refresh()
@@ -400,11 +407,11 @@ public class LoadoutState : AState
             if (PlayerData.instance.ftueLevel == 1)
             {
                 PlayerData.instance.ftueLevel = 2;
-                PlayerData.instance.Save();
+                //PlayerData.instance.Save();
             }
         }
 
-        manager.SwitchState("Game");
+        StartCoroutine(manager.SwitchState("Game"));
     }
 
 	public void Openleaderboard()

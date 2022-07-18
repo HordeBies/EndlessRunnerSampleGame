@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
+using LootLocker.Requests;
 #if UNITY_ANALYTICS
 using UnityEngine.Analytics;
 #endif
@@ -75,7 +76,7 @@ public class PlayerData
             consumables.Remove(type);
         }
 
-        Save();
+        Save(SaveType.Consumables);
     }
 
     public void Add(Consumable.ConsumableType type)
@@ -87,7 +88,6 @@ public class PlayerData
 
         consumables[type] += 1;
 
-        Save();
     }
 
     public void AddCharacter(string name)
@@ -170,7 +170,7 @@ public class PlayerData
 
         CheckMissionsCount();
 
-        Save();
+        //Save();
     }
 
 	// High Score management
@@ -245,151 +245,84 @@ public class PlayerData
         m_Instance.coins = 0;
         m_Instance.premium = 0;
 
-		m_Instance.characters.Add("Trash Cat");
-		m_Instance.themes.Add("Day");
-
         m_Instance.ftueLevel = 0;
         m_Instance.rank = 0;
 
         m_Instance.CheckMissionsCount();
 
-		m_Instance.Save();
+		//m_Instance.Save();
 	}
 
     public void Read()
     {
-        BinaryReader r = new BinaryReader(new FileStream(saveFile, FileMode.Open));
 
-        int ver = r.ReadInt32();
+        //consumables.Clear();
 
-		if(ver < 6)
-		{
-			r.Close();
 
-			NewSave();
-			r = new BinaryReader(new FileStream(saveFile, FileMode.Open));
-			ver = r.ReadInt32();
-		}
+        //// Read character.
+        //characters.Clear();
 
-        coins = r.ReadInt32();
 
-        consumables.Clear();
-        int consumableCount = r.ReadInt32();
-        for (int i = 0; i < consumableCount; ++i)
-        {
-            consumables.Add((Consumable.ConsumableType)r.ReadInt32(), r.ReadInt32());
-        }
+        usedCharacter = 0;
 
-        // Read character.
-        characters.Clear();
-        int charCount = r.ReadInt32();
-        for(int i = 0; i < charCount; ++i)
-        {
-            string charName = r.ReadString();
+        //// Read character accesories.
+        //characterAccessories.Clear();
 
-            if (charName.Contains("Raccoon") && ver < 11)
-            {//in 11 version, we renamed Raccoon (fixing spelling) so we need to patch the save to give the character if player had it already
-                charName = charName.Replace("Racoon", "Raccoon");
-            }
 
-            characters.Add(charName);
-        }
+        //// Read Themes.
+        //themes.Clear();
 
-        usedCharacter = r.ReadInt32();
 
-        // Read character accesories.
-        characterAccessories.Clear();
-        int accCount = r.ReadInt32();
-        for (int i = 0; i < accCount; ++i)
-        {
-            characterAccessories.Add(r.ReadString());
-        }
+        usedTheme = 0;
 
-        // Read Themes.
-        themes.Clear();
-        int themeCount = r.ReadInt32();
-        for (int i = 0; i < themeCount; ++i)
-        {
-            themes.Add(r.ReadString());
-        }
-
-        usedTheme = r.ReadInt32();
-
-        // Save contains the version they were written with. If data are added bump the version & test for that version before loading that data.
-        if(ver >= 2)
-        {
-            premium = r.ReadInt32();
-        }
-
-        // Added highscores.
-		if(ver >= 3)
-		{
-			highscores.Clear();
-			int count = r.ReadInt32();
-			for (int i = 0; i < count; ++i)
-			{
-				HighscoreEntry entry = new HighscoreEntry();
-				entry.name = r.ReadString();
-				entry.score = r.ReadInt32();
-
-				highscores.Add(entry);
-			}
-		}
-
-        // Added missions.
-        if(ver >= 4)
-        {
-            missions.Clear();
-
-            int count = r.ReadInt32();
-            for(int i = 0; i < count; ++i)
-            {
-                MissionBase.MissionType type = (MissionBase.MissionType)r.ReadInt32();
-                MissionBase tempMission = MissionBase.GetNewMissionFromType(type);
-
-                tempMission.Deserialize(r);
-
-                if (tempMission != null)
-                {
-                    missions.Add(tempMission);
-                }
-            }
-        }
-
-        // Added highscore previous name used.
-		if(ver >= 7)
-		{
-			previousName = r.ReadString();
-		}
-
-        if(ver >= 8)
-        {
-            licenceAccepted = r.ReadBoolean();
-        }
-
-		if (ver >= 9) 
-		{
-			masterVolume = r.ReadSingle ();
-			musicVolume = r.ReadSingle ();
-			masterSFXVolume = r.ReadSingle ();
-		}
-
-        if(ver >= 10)
-        {
-            ftueLevel = r.ReadInt32();
-            rank = r.ReadInt32();
-        }
-
-        if (ver >= 12)
-        {
-            tutorialDone = r.ReadBoolean();
-        }
-
-        r.Close();
     }
 
-    public void Save()
+    public enum SaveType
     {
+        Currency,
+
+        Consumables,
+
+        Characters,
+        Themes,
+    }
+    public void Save(SaveType type)
+    {
+        switch (type)
+        {
+            case SaveType.Currency:
+                LootLockerSDKManager.UpdateOrCreateKeyValue("Coin", coins.ToString(),null);
+                LootLockerSDKManager.UpdateOrCreateKeyValue("Premium", premium.ToString(),null);
+                break;
+            case SaveType.Consumables:
+                int val = 0;
+                if(!consumables.TryGetValue(Consumable.ConsumableType.COIN_MAG, out val)) val = 0;
+                LootLockerSDKManager.UpdateOrCreateKeyValue("Magnet", val.ToString(), null);
+                if(!consumables.TryGetValue(Consumable.ConsumableType.SCORE_MULTIPLAYER, out val)) val = 0;
+                LootLockerSDKManager.UpdateOrCreateKeyValue("X2", val.ToString(), null);
+                if(!consumables.TryGetValue(Consumable.ConsumableType.INVINCIBILITY, out val)) val = 0;
+                LootLockerSDKManager.UpdateOrCreateKeyValue("Invincible", val.ToString(), null);
+                if(!consumables.TryGetValue(Consumable.ConsumableType.EXTRALIFE, out val)) val = 0;
+                LootLockerSDKManager.UpdateOrCreateKeyValue("Life", val.ToString(), null);
+                break;
+            case SaveType.Characters:
+                LootLockerSDKManager.UpdateOrCreateKeyValue("RubbishRaccoon", characters.Contains("Rubbish Raccoon").ToString(), null);
+                LootLockerSDKManager.UpdateOrCreateKeyValue("TrashCat", characters.Contains("Trash Cat").ToString(), null);
+                break;
+            case SaveType.Themes:
+                LootLockerSDKManager.UpdateOrCreateKeyValue("DayTheme", themes.Contains("Day").ToString(), null);
+                LootLockerSDKManager.UpdateOrCreateKeyValue("NightTheme", themes.Contains("NightTime").ToString(), null);
+                break;
+            default:
+                break;
+        }
+
+
+
+
+
+        return;
+
         BinaryWriter w = new BinaryWriter(new FileStream(saveFile, FileMode.OpenOrCreate));
 
         w.Write(s_Version);
@@ -478,7 +411,7 @@ public class PlayerDataEditor : Editor
     {
         PlayerData.instance.coins += 1000000;
 		PlayerData.instance.premium += 1000;
-        PlayerData.instance.Save();
+        PlayerData.instance.Save(PlayerData.SaveType.Currency);
     }
 
     [MenuItem("Trash Dash Debug/Give 10 Consumables of each types")]
@@ -494,7 +427,7 @@ public class PlayerDataEditor : Editor
             }
         }
 
-        PlayerData.instance.Save();
+        PlayerData.instance.Save(PlayerData.SaveType.Consumables);
     }
 }
 #endif

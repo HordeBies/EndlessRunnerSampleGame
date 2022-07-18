@@ -94,7 +94,7 @@ public class ShopThemeList : ShopList
         PlayerData.instance.coins -= t.cost;
 		PlayerData.instance.premium -= t.premiumCost;
         PlayerData.instance.AddTheme(t.themeName);
-        PlayerData.instance.Save();
+        //PlayerData.instance.Save();
 
 #if UNITY_ANALYTICS // Using Analytics Standard Events v0.3.0
         var transactionId = System.Guid.NewGuid().ToString();

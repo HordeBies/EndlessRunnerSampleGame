@@ -25272,6 +25272,7 @@ MonoBehaviour:
   manager: {fileID: 0}
   LoginCanvas: {fileID: 1709046012}
   LoginTypeSelectionMenu: {fileID: 1286854004}
+  WhiteLoginCanvas: {fileID: 1131486668}
   LoginButton: {fileID: 1392906693}
   WhiteLabelLoginButton: {fileID: 4458231432725139117}
   ExistingEmailField: {fileID: 4458231433765422825}

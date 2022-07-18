@@ -96,6 +96,10 @@ public class ShopUI : MonoBehaviour
 
 	public void CloseScene()
 	{
+        PlayerData.instance.Save(PlayerData.SaveType.Currency);
+        PlayerData.instance.Save(PlayerData.SaveType.Consumables);
+        PlayerData.instance.Save(PlayerData.SaveType.Characters);
+        PlayerData.instance.Save(PlayerData.SaveType.Themes);
         SceneManager.UnloadSceneAsync("shop");
 	    LoadoutState loadoutState = GameManager.instance.topState as LoadoutState;
 	    if(loadoutState != null)
@@ -112,7 +116,7 @@ public class ShopUI : MonoBehaviour
 
         PlayerData.instance.coins += k_CheatCoins;
 		PlayerData.instance.premium += k_CheatPremium;
-		PlayerData.instance.Save();
+		PlayerData.instance.Save(PlayerData.SaveType.Currency);
 	}
 
 #if UNITY_ADS

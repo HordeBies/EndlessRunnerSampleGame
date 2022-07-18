@@ -160,7 +160,7 @@ public class ShopAccessoriesList : ShopList
         PlayerData.instance.coins -= cost;
 		PlayerData.instance.premium -= premiumCost;
 		PlayerData.instance.AddAccessory(name);
-        PlayerData.instance.Save();
+        //PlayerData.instance.Save();
 
 #if UNITY_ANALYTICS // Using Analytics Standard Events v0.3.0
         var transactionId = System.Guid.NewGuid().ToString();

@@ -95,7 +95,6 @@ public class ShopCharacterList : ShopList
         PlayerData.instance.coins -= c.cost;
 		PlayerData.instance.premium -= c.premiumCost;
         PlayerData.instance.AddCharacter(c.characterName);
-        PlayerData.instance.Save();
 
 #if UNITY_ANALYTICS // Using Analytics Standard Events v0.3.0
         var transactionId = System.Guid.NewGuid().ToString();
