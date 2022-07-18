@@ -21,10 +21,6 @@ GUI client, please refer to their respective documentation
 
 This project is a "endless runner" type mobile game made in Unity
 
-You can find [the project on the Unity asset store](https://assetstore.unity.com/packages/essentials/tutorial-projects/endless-runner-sample-game-87901)
-(Note that this is the old version not using Lightweight rendering pipeline & addressable, see note at the end of this file.
-Assets stor version will be updated when Addressable is out of preview)
-
 A INSTRUCTION.txt text file is inside the Asset folder to highlight diverse
 important points of the project
 
