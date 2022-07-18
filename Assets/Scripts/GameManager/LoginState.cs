@@ -61,6 +61,7 @@ public class LoginState : AState
         LoginCanvas.gameObject.SetActive(false);
         LoginTypeSelectionMenu.SetActive(false);
         //TODO: Populate PlayerData Class
+        var pd = PlayerData.instance;
     }
 
     public override string GetName()
@@ -210,8 +211,10 @@ public class LoginState : AState
             Debug.Log("error while creating user");
             var responseDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(signUpResponse.text);
             var error = responseDict["message"];
+            PopupManager.CreatePopup(PopupType.Error, error);
             yield break;
         }
+        PopupManager.CreatePopup(PopupType.Info, "User Created Successfully");
         Debug.Log("user created successfully");
 
         yield return WhiteLabelLoginRoutine(true);
