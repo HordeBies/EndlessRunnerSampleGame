@@ -1,11 +1,12 @@
 using LootLocker.Requests;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public static class LootLockerHelper 
 {
-    public static void ChangeUserName(string userName)
+    public static void ChangeUserName(string userName,Action<PlayerNameResponse> callback)
     {
         LootLockerSDKManager.SetPlayerName(userName, (response) =>
         {
@@ -17,6 +18,7 @@ public static class LootLockerHelper
             {
                 Debug.LogError("Could not set player name " + response.Error);
             }
+            callback?.Invoke(response);
         });
     }
 }

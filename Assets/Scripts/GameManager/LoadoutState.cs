@@ -416,6 +416,22 @@ public class LoadoutState : AState
 
     public void ChangeUserName()
     {
-        LootLockerHelper.ChangeUserName(playerNameInputField.text);
+        LootLockerHelper.ChangeUserName(playerNameInputField.text, ChangeUserNameCallback);
+    }
+    public void ChangeUserNameCallback(PlayerNameResponse response)
+    {
+        PopupType type;
+        string text;
+        if (response.success)
+        {
+            type = PopupType.Info;
+            text = "Your name successfully changed to: " + response.name;
+        }
+        else
+        {
+            type = PopupType.Error;
+            text = "Error while changing your username!";
+        }
+        PopupManager.CreatePopup(type,text);
     }
 }

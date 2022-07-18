@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using LootLocker.Requests;
 using TMPro;
+using Newtonsoft.Json;
 
 public class LoginState : AState
 {
@@ -118,6 +119,8 @@ public class LoginState : AState
         else
         {
             Debug.LogError("Session Couldn't Started!");
+            var responseDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.text);
+            StartCoroutine(FailedToLogin(responseDict["message"]));
         }
     }
 
@@ -139,7 +142,8 @@ public class LoginState : AState
         if (!loginResponse.success)
         {
             Debug.Log("Error while logging in");
-            FailedToLogin();
+            var responseDict = JsonConvert.DeserializeObject<Dictionary<string,string>>(loginResponse.text);
+            StartCoroutine(FailedToLogin(responseDict["message"]));
             yield break;
         }
 
@@ -148,11 +152,24 @@ public class LoginState : AState
         if(!isRegister) manager.SwitchState("Loadout");
     }
 
-    private void FailedToLogin()
+    private IEnumerator FailedToLogin(string error,float duration = 5f)
     {
         //TODO: Create Pop-up about error
+        PopupManager.CreatePopup(PopupType.Error, error, duration);
+        
+        yield return new WaitForSeconds(2f);
+        
         LoginButton.interactable = true;
         WhiteLabelLoginButton.interactable = true;
+    }
+
+    private IEnumerator FailedToRegister(string error, float duration = 5f)
+    {
+        //TODO: create popup about registering error
+
+        yield return new WaitForSeconds(2f);
+        //TODO: reenable register button
+
     }
 
     private IEnumerator WhiteLabelSessionRoutine()
@@ -191,6 +208,8 @@ public class LoginState : AState
         if (!signUpResponse.success)
         {
             Debug.Log("error while creating user");
+            var responseDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(signUpResponse.text);
+            var error = responseDict["message"];
             yield break;
         }
         Debug.Log("user created successfully");
@@ -199,7 +218,7 @@ public class LoginState : AState
 
         string userName = RegisterUsernameField.text;
         Debug.Log("Starting to change name to: " + userName);
-        LootLockerHelper.ChangeUserName(userName);
+        LootLockerHelper.ChangeUserName(userName,null);
         manager.SwitchState("Loadout");
     }
 

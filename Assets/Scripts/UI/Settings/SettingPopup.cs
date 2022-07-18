@@ -11,7 +11,6 @@ public class SettingPopup : MonoBehaviour
     public Slider masterSFXSlider;
 
     public LoadoutState loadoutState;
-    public DataDeleteConfirmation confirmationPopup;
 
     protected float m_MasterVolume;
     protected float m_MusicVolume;
@@ -43,17 +42,6 @@ public class SettingPopup : MonoBehaviour
         masterSlider.value = 1.0f - (m_MasterVolume / k_MinVolume);
         musicSlider.value = 1.0f - (m_MusicVolume / k_MinVolume);
         masterSFXSlider.value = 1.0f - (m_MasterSFXVolume / k_MinVolume);
-    }
-
-    public void DeleteData()
-    {
-        confirmationPopup.Open(loadoutState);
-    }
-
-    public void LogOut()
-    {
-        confirmationPopup.Open(loadoutState);
-
     }
 
 
