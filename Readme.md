@@ -13,4 +13,5 @@ GUI client, please refer to their respective documentation
 
 ## Description
 
-This project is a "endless runner" type mobile game made in Unity
+This project is a "endless runner" type mobile game made in Unity. 
+And demonstrates basic functionality of cloud integration using LootLocker.
